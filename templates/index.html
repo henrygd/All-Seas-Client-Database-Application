@@ -1,0 +1,488 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimal-ui">
+    <title>Client Database</title>
+    <link rel="shortcut icon" href="static/img/favicon.ico">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/3.0.2/normalize.min.css">
+    <link rel="stylesheet" href="static/css/clientdb.css">
+    <style media="print">body,html{background-color:#fff;padding-top:1.5em}.paper{width:100%;background-color:#fff;border:0;padding-top:0;box-shadow:none}header p{font-size:1.3em}.subtitle{font-size:.7em}.header-pic{float:left}.profiles,.search,.addlink,#left-panel,#optionsicon,#closeicon{display:none!important}.content{page-break-inside:avoid;page-break-after:auto}.header-text{float:left;margin-top:-1.6em}.content-wrapper > .content:first-child{padding-top:2em}.content:last-child{padding-bottom:0}.content-cat{width:30%;color:#000;text-align:left}.content-cat p{font-size:.6em;font-weight:600}header p,.content-text,.client-info-extra p,.content-text ul li:first-child,.client-info-extra .highlight,.content-text.skills-listing > ul > li > .highlight{color:#000}.content-text.skills-listing > ul > li span,.subtitle,.fa{color:#212121!important}.content-text ul:last-child{margin-bottom:.25em}.content-text ul li:first-child{width:50%}.profiles-listing ul li:first-child{width:32%}div.content-text.skills-listing > ul > li{width:33%}.client-info-extra p{margin-bottom:.1em}div.content-text.skills-listing > ul > li > p{margin-top:.4em;margin-bottom:.5em}div.content-text.skills-listing > ul > li{padding-left:1.5em}div.content-text.skills-listing > ul > li:first-child{padding-left:2em}.note{display:none}.content-text:hover{border-left:1px solid #eee}.content-text ul li a:hover{color:#4fc3f7}.highlight:hover,.content-text.skills-listing > ul > li > .highlight:hover{border-left:1px solid #eee}.big-text{padding-top:0}select{border:none!important}</style>
+    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="static/js/nprogress.js"></script>
+</head>
+<body>
+
+    <div class="search">
+        <!-- SELECTION BOX / SEARCH FIELD-->
+        <select id="value">
+            <option value="name">Name</option>
+            <option value="address">Address</option>
+            <option value="citystate">City/State</option>
+            <option value="notes">Notes</option>
+            <option value="favoriteline">Favorite Line</option>
+            <option value="diningtime">Dining Time</option>
+            <option value="cabintype">Cabin Type</option>
+            <option value="travelswith">Travels With</option>
+            <option value="trips">Trips</option>
+        </select>
+        <div class="inner-addon right-addon" style="text-align:left;display:inline-block">
+                <i class="fa fa-search" onclick="search()"></i>
+                <input type="text" id="searchbox" onkeyup="search()">
+        </div>
+        
+        <!-- MODAL POPUP -->
+        <div id="pin" style="display:none">
+            <div id="pincont">
+                <div style="position:relative;height:0">
+                    <i id="pincloseicon" class="fa fa-times" onclick="fadeout()"></i>
+                </div>
+                <ul id="result2"></ul>
+                <div id="confirmaction">
+                <p></p>
+                <button id="btnconfirm1" class="btngreen">yes</button>
+                <button class="btnred" onclick="fadeout()">no</button>
+            </div>
+            </div>
+        </div>
+        <div id="overlay"></div>
+
+    </div>
+
+    <!-- START CLIENT INFO -->
+    <div class="client-wrapper">
+        <article class="paper">
+            <header>
+                <div class="header-content">
+                    <div class="header-text">
+                        <p id="name-text"><i class="fa fa-user" style="font-size:.9em"></i> <span id="name" contenteditable="true">Name</span></p>
+                        <p  class="subtitle">
+                        Birth Date: <span id="birthdate" contenteditable="true">10/07/1988</span>
+                            </p>
+                    </div>
+                </div>
+            </header>
+            <div class="content-wrapper">
+
+                <!-- CONTACT -->
+                <section class="content">
+                    <div class="row">
+                        <div class="content-cat"><i class="fa fa-envelope-o" style="color:#C5AF00"></i> Contact </div>
+                        <div class="content-text">
+                            <ul>
+                                <li>Email</li>
+                                <li id="email"  contenteditable="true">email@address.com</li>
+                            </ul>
+                            <ul>
+                                <li>Phone</li>
+                                <li id="phone"  contenteditable="true">(239) 999-999</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- LOCATION -->
+                <section class="content">
+                    <div class="row">
+                        <div class="content-cat"><i class="fa fa-map-marker" style="color:#EB6262"></i> Location </div>
+                        <div class="content-text">
+                            <ul >
+                                <li>Address</li>
+                                <li id="address" contenteditable="true">1234 Example St</li>
+                            </ul>
+                            <ul>
+                                <li>City &amp; State</li>
+                                <li id="citystate"  contenteditable="true">City, State 99999</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- NOTES -->
+                <section class="content">
+                    <div class="row">
+                        <div class="content-cat"><i class="fa fa-pencil-square-o" style="color:#B64BBC"></i> Notes
+                        </div>
+                        <div id="notes" class="content-text client-info-extra client-info" contenteditable="true"><p>None</p></div>
+                    </div>
+                </section>
+
+                <!-- FAVORITE LINE -->
+                <section class="content">
+                    <div class="row">
+                        <div class="content-cat"><i class="fa fa-ship" style="color:#3BA54A"></i> Favorite Line
+                        </div>
+                        <div class="content-text client-info-extra client-info">
+                            <p>
+                                <select id="favoriteline" style="font-size:1em">
+                                    <option value="Not Specified">Not Specified</option>
+                                    <option value="Luxury">Luxury</option>
+                                    <option value="Crystal">Crystal</option>
+                                    <option value="Silversea">Silversea</option>
+                                    <option value="Royal Caribbean">Royal Caribbean</option>
+                                    <option value="Celebrity">Celebrity</option>
+                                    <option value="Princess">Princess</option>
+                                    <option value="Holland">Holland</option>
+                                    <option value="Oceania">Oceania</option>
+                                    <option value="Carnival">Carnival</option>
+                                    <option value="Viking">Viking</option>
+                                    <option value="Avalon">Avalon</option>
+                                </select>
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- DINING TIME -->
+                <section class="content">
+                    <div class="row">
+                        <div class="content-cat"><i class="fa fa-cutlery" style="color:#9D9986"></i> Dining Time
+                        </div>
+                        <div class="content-text client-info-extra client-info">
+                            <p>
+                                <select id="diningtime" style="font-size:1em">
+                                    <option value="Not Specified">Not Specified</option>
+                                    <option value="Early">Early</option>
+                                    <option value="Late">Late</option>
+                                    <option value="Open">Open</option>
+                                </select>
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- CABIN TYPE -->
+                <section class="content">
+                    <div class="row">
+                        <div class="content-cat"><i class="fa fa-bed" style="color:#BD8C41"></i> Cabin Type
+                        </div>
+                        <div class="content-text client-info-extra client-info">
+                            <p>
+                                <select id="cabintype" style="font-size:1em">
+                                    <option value="Not Specified">Not Specified</option>
+                                    <option value="Balcony">Balcony</option>
+                                    <option value="Window">Window</option>
+                                    <option value="Interior">Interior</option>
+                                    <option value="Suite">Suite</option>
+                                </select>
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TRAVELS WITH -->
+                <section class="content">
+                    <div class="row">
+                        <div class="content-cat"><i class="fa fa-group" style="color:#40A9AA"></i> Travels With
+                            <p><a class="addlink" onclick="addtravelparter()"><i class="fa fa-plus"></i><i class="fa fa-child" style="font-size:17px"></i></a></p>
+                        </div>
+                        <div id="travelswith" class="content-text client-info-extra client-info" contenteditable="true"></div>
+                    </div>
+                </section>
+
+                <!-- RECENT TRIPS -->
+                <section class="content">
+                    <div class="row">
+                        <div class="content-cat"><i class="fa fa-plane" style="color:#5762BE"></i> Recent Trips
+                            <p><a class="addlink" onclick="addrecenttrip()"><i class="fa fa-plus"></i><i class="fa fa-plane" style="font-size:17px"></i></a></p>
+                        </div>
+                        <div id="recenttrips" class="content-text client-info-extra client-info" contenteditable="true"></div>
+                    </div>
+                </section>
+
+                <input type="text" id="idfield" style="display:none">
+
+            </div>
+        </article>
+    </div>
+
+    <!-- OPTIONS PANEL - OPEN / CLOSE ICONS-->
+    <div id="optionsicon">
+      <button id="optionstoggle">
+        <i class="fa fa-bars" ></i>
+      </button>
+    </div>
+
+    <div id="closeicon" style="display:none">
+      <button id="closetoggle">
+        <i class="fa fa-times"></i>
+      </button>
+    </div>
+
+    <div id="left-panel">
+        <div style="height:100%;display:table">
+            <div class="panelbody">
+                <a href="https://allseascruises.com" target="_blank"><img src="static/img/logo.png" width="260px" title="All Seas Cruises and Travel" alt="All Seas Cruises and Travel"></a>
+                <button id="btnblank" class="item" onclick="confirmaction('LOAD A NEW TEMPLATE</strong>? You will lose any unsaved changes to the currently opened client page.','newclient()')"><i class="fa fa-file-text"></i><p>blank template</p></button>
+                <button id="btnadd" class="item" onclick="addclient()"><i class="fa fa-user-plus"></i><p>add client</p></button>
+                <button id="btnupdate" class="item" onclick="confirmaction('UPDATE</strong> this client?','updateclient()')"><i class="fa fa-refresh"></i><p>update client</p></button>
+                <button id="btndelete" class="item" onclick="confirmaction('DELETE</strong> this client?','deleteclient()')"><i class="fa fa-trash"></i><p>delete client</p></button>
+                <button class="item" onclick="downloaddb()"><i class="fa fa-database"></i><p>download<br>database</p></button>
+                <button class="item" onclick="dlspreadsheet()"><i class="fa fa-table"></i><p>export<br>spreadsheet</p></button>
+                <button id="btnlogout" class="item" style="width:100%" onclick="confirmaction('LOG OUT</strong>?','logout()')"><i class="fa fa-sign-out"></i><p>Log Out</p></button>
+            </div>
+        </div>
+    </div>
+
+
+<!-- START SCRIPTS -->
+
+<!-- top bar ajax loading indicator -->
+<script>
+    NProgress.start();
+    setTimeout(function() { NProgress.done(); $('.fade').removeClass('out'); }, 600);
+</script>
+
+<!-- hides/shows menu -->
+<script>
+    $('#optionstoggle').click(function() {
+        $('#left-panel-link').click();
+        $('#optionsicon').fadeOut();
+        $('#left-panel').animate({left: "0"}, 200)
+        $('body').animate({marginRight: "-300px"}, 200 );
+        setTimeout(function(){$('#closeicon').fadeIn(200)}, 220);
+    });
+    $('#closetoggle').click(function() {
+        $('#left-panel-link').click();
+        $('#closeicon,#expandicon').hide();
+        $('#left-panel').animate({left: "-300px"}, 200)
+        $('body').animate({marginRight: "0"}, 200 );
+        setTimeout(function(){$('#optionsicon').fadeIn(200)}, 220);
+    });
+</script>
+
+<!-- client search function -->
+<script>
+    function search(){
+      if ($('#searchbox').val().length < 2 || event.keyCode == 8 || event.keyCode == 32)
+        return false
+      else
+      $.ajax ({
+        url: "{{ url_for('clientsearch') }}",
+        global: false,
+        data: {a: $('#searchbox').val(), z:$('#value').val()}
+      }).done(function(data) {
+        $('#result2').text('')
+        fadein()
+        if (data.result.length == 0){
+            $('#result2').text("No results!")
+            }
+          else{
+            for (var i = data.result.length -1; i >= 0; i--) {
+                $('#result2').append('<li><a onclick="openClient(\''+data.result[i].id+'\')">'+data.result[i].name+' | '+data.result[i].citystate+'</a></li>')
+            };
+            }
+        });
+    }
+</script>
+
+<!-- opens client to browse / edit -->
+<script>
+function openClient(id){
+    fadeout()
+    $.ajax ({
+        url: "{{ url_for('openclient') }}",
+        global: false,
+        data: {b: id}
+      }).done(function(data) {
+        if (data.result=='error'){
+            $('#result2').text("Sorry, something went wrong.")
+            fadein()
+            }
+          else{
+            var paper = $('.paper')
+            paper.fadeOut(250)
+            setTimeout(function(){
+                $('#name').html(data.result[0].name)
+                $('#birthdate').html(data.result[0].birthdate)
+                $('#email').html(data.result[0].email)
+                $('#phone').html(data.result[0].phone)
+                $('#address').html(data.result[0].address)
+                $('#citystate').html(data.result[0].citystate)
+                $('#notes').html(data.result[0].notes)
+                $('#favoriteline').val(data.result[0].favoriteline)
+                $('#cabintype').val(data.result[0].cabintype)
+                $('#diningtime').val(data.result[0].diningtime)
+                $('#travelswith').html(data.result[0].travelswith)
+                $('#recenttrips').html(data.result[0].trips)
+                $('#idfield').val(id)
+            }, 251)
+            setTimeout(function(){paper.fadeIn(300)},255)
+            }
+        });
+}
+</script>
+
+<!-- confirmation popup -->
+<script>
+function confirmaction(message,func){
+    $('#result2').text('')
+    $('#confirmaction>p').html('Are you sure you want to <strong>'+message)
+    $('#btnconfirm1').attr('onclick',func)
+    $('#confirmaction').show()
+    fadein()
+}
+</script>
+
+<!-- delete client -->
+<script>
+    function deleteclient(){
+        var id = $('#idfield').val()
+        if (id == ""){
+            noclientselected()}
+        else{
+            $('#confirmaction,#pin').fadeOut(150)
+            setTimeout(function(){
+            $.ajax ({
+                url: "{{ url_for('deleteclient') }}",
+                data: {id: id}
+          }).done(function(data) {
+            if (data.result=='error'){
+                $('#result2').text("Sorry, something went wrong.")}
+            else{
+                $('#result2').text(data.result)
+                newclient()}
+            fadein()
+            });}, 151)
+        }
+    }
+</script>
+
+<!-- update client -->
+<script>
+    function updateclient(){
+        var id = $('#idfield').val()
+        if (id == ""){
+            noclientselected()}
+        else{
+            $('#confirmaction,#pin').fadeOut(150)
+            setTimeout(function(){
+                $.post ("{{ url_for('updateclient') }}", {
+                    id: $('#idfield').val(),
+                    name: $('#name').html(),
+                    birthdate: $('#birthdate').html(),
+                    email: $('#email').html(),
+                    phone: $('#phone').html(),
+                    address: $('#address').html(),
+                    citystate: $('#citystate').html(),
+                    notes: $('#notes').html(),
+                    favoriteline: $('#favoriteline').val(),
+                    cabintype: $('#cabintype').val(),
+                    diningtime: $('#diningtime').val(),
+                    travelswith: $('#travelswith').html(),
+                    trips: $('#recenttrips').html(),
+              }).done(function(data) {
+                if (data.result=='error'){
+                    $('#result2').text("Sorry, something went wrong.")
+                    }
+                  else{
+                    $('#result2').text(data.result)
+                    }
+                fadein()
+            });}, 151)
+        }
+    }
+</script>
+
+<!-- add currently open client to db -->
+<script>
+function addclient(){
+    $.post ("{{ url_for('addclient') }}", {
+            name: $('#name').html(),
+            birthdate: $('#birthdate').html(),
+            email: $('#email').html(),
+            phone: $('#phone').html(),
+            address: $('#address').html(),
+            citystate: $('#citystate').html(),
+            notes: $('#notes').html(),
+            favoriteline: $('#favoriteline').val(),
+            cabintype: $('#cabintype').val(),
+            diningtime: $('#diningtime').val(),
+            travelswith: $('#travelswith').html(),
+            trips: $('#recenttrips').html(),
+        }, function(data) {
+            $('#result2').text(data.result)
+            $('#idfield').val(data.id)
+            fadein()
+        });
+};
+</script>
+
+<!-- loads blank template -->
+<script>
+function newclient(){
+    fadeout()
+    var paper = $('.paper')
+    paper.fadeOut(250)
+    setTimeout(function(){
+        $('#name').html('Name')
+        $('#birthdate').html('10/07/1988')
+        $('#email').html('email@address.com')
+        $('#phone').html('(239) 999-999')
+        $('#address').html('1234 Example St')
+        $('#citystate').html('City, State 99999')
+        $('#notes').html('<p>None</p>')
+        $('#favoriteline,#cabintype,#diningtime').val('Not Specified')
+        $('#travelswith,#recenttrips').html('')
+        $('#idfield').val("")
+    }, 251)
+    setTimeout(function(){paper.fadeIn(300)},255)
+}
+</script>
+
+<!-- various onclick functions-->
+<script>
+    // adds formatted travel partner template
+    function addtravelparter(){
+        $('#travelswith').append('<div><p>Person</p><p>Info</p></div>')
+    }
+    // adds formatted trip template
+    function addrecenttrip(){
+        $('#recenttrips').prepend('<div><p>When | Where | Ship</p><p>Notes</p></div>')
+    }
+    // logout
+    function logout(){
+        window.location.replace('/logout')
+    }
+    // download database backup
+    function downloaddb(){
+        window.location.assign('/downloaddb')
+    }
+    // download spreadsheet backup
+    function dlspreadsheet(){
+        window.location.assign('/dlspreadsheet')
+    }
+    // fades out the modal / overlay
+    function fadeout(){
+        $('#pin,#confirmaction').fadeOut(150)
+        $('#overlay').fadeOut(300)
+        $('#value,.inner-addon').removeClass('aboveoverlay')
+    }
+    // fades in the modal / overlay
+    function fadein(){
+        $('#pin').fadeIn(150)
+        $('#overlay').fadeIn(300)
+        $('#value,.inner-addon').addClass('aboveoverlay')
+    }
+    // shows no client selected error
+    function noclientselected(){
+        $('#confirmaction,#pin').fadeOut(150)
+        setTimeout(function(){
+            $('#result2').text('Error: No client selected.')
+            fadein()}, 155)
+    }
+</script>
+
+<!-- show nprogress loading during ajax -->
+<script>
+$(document).bind("ajaxSend", function(){
+   NProgress.start();
+}).bind("ajaxComplete", function(){
+   NProgress.done();
+});
+</script>
+
+</body>
+</html>
